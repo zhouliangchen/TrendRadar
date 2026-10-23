@@ -129,7 +129,7 @@ rss:
   feeds:
     - id: "hacker-news"
       name: "Hacker News"
-      url: "https://hnrss.org/frontpage"
+      url: "https://news.ycombinator.com/rss"
 
     - id: "ruanyifeng"
       name: "阮一峰的网络日志"
@@ -140,6 +140,7 @@ rss:
     - id: "yahoo-finance"
       name: "雅虎财经"
       url: "https://finance.yahoo.com/news/rssindex"
+      enabled: false                  # 试运行返回 404/429，暂时停用该源
 
     # 自定义源示例
     # - id: "custom-feed"
@@ -388,12 +389,12 @@ ai:
                                     #    这样几乎任何服务商都能接入。
 
 
-  timeout: 120                      # 请求超时（秒）
+  timeout: 240                      # 请求超时（秒），为 GLM-5.3 分析预留时间
 
   temperature: 1.0                  # 采样温度 (0.0-2.0)
                                     # 注意：部分模型(如 gpt-5)可能要求必须为 1.0，否则会报错
   
-  max_tokens: 5000                  # 最大生成 token 数
+  max_tokens: 12000                 # 最大生成 token 数，避免推理过程占用额度后截断正文
                                     # 注意：如果 API 不支持此参数(报 HTTP 400)，请设为 0 以禁用发送
   # 高级选项
   num_retries: 1                    # 失败重试次数

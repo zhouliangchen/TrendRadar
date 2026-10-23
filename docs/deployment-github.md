@@ -9,7 +9,7 @@
 ## 运行与存储
 
 采用上游 v6.11.0，每小时第 33 分钟运行一次（GitHub 定时任务可能延迟），显示时区为 Asia/Shanghai。
-沿用默认 11 个热榜平台、已启用的 RSS 及关键词，报告模式 current。
+保留默认 11 个热榜平台及关键词，报告模式 current。Hacker News 使用官方 RSS；雅虎财经源因试运行返回 404/429 暂停。
 源码位于 master 分支；运行时从 data 分支恢复 SQLite 和历史报告，运行结束后提交回 data。
 输出文件默认保留 30 天；旧版本仍可能存在于 Git 历史中，需长期关注仓库体积。
 GitHub Pages 通过官方 Actions 工作流部署，仅上传 HTML 报告，不上传数据库。
@@ -31,6 +31,7 @@ GitHub Pages 通过官方 Actions 工作流部署，仅上传 HTML 报告，不�
 | WEWORK_MSG_TYPE | `markdown`（默认，可不填） |
 
 AI 分析只有在 API Key 和模型名已配置时才启用；标题筛选仍使用默认关键词。
+GLM-5.3 的输出额度设为 12000 token，超时 240 秒，避免推理占用额度后分析正文被截断。
 消息推送按用户要求暂缓，`notification.enabled` 已关闭。后续启用时再配置企业微信 Webhook 并打开通知开关。
 
 ## 企业微信端配置

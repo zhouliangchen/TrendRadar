@@ -2,11 +2,10 @@
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
-now = datetime.now(ZoneInfo("Asia/Shanghai"))
+now = datetime.now(timezone(timedelta(hours=8)))
 db = Path("output/news") / f"{now:%Y-%m-%d}.db"
 if not db.is_file():
     raise SystemExit("No database was generated for today")
