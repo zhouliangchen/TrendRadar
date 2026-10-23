@@ -23,10 +23,25 @@ if not report.is_file() or report.stat().st_size < 1000:
     raise SystemExit("No HTML report was generated")
 if report.read_bytes() != Path("output/index.html").read_bytes():
     raise SystemExit("The entry report does not match the generated report")
-result = {"date": now.strftime("%Y-%m-%d"), "crawl_time": latest[1], "news_items": latest[2], "platforms": statuses, "report_bytes": report.stat().st_size}
+html = report.read_text(encoding="utf-8")
+ai_status = "success" if 'class="ai-section-title"' in html else "not_generated"
+if "AI 分析失败:" in html:
+    ai_status = "failed"
+rss = {}
+rss_db = Path("output/rss") / f"{now:%Y-%m-%d}.db"
+if rss_db.is_file():
+    with sqlite3.connect(f"file:{rss_db.as_posix()}?mode=ro", uri=True) as conn:
+        record = conn.execute("SELECT id, total_items FROM rss_crawl_records ORDER BY id DESC LIMIT 1").fetchone()
+        if record:
+            rss = {"items": record[1], "sources": dict(conn.execute("SELECT status, count(*) FROM rss_crawl_status WHERE crawl_record_id=? GROUP BY status", (record[0],)))}
+result = {"date": now.strftime("%Y-%m-%d"), "crawl_time": latest[1], "news_items": latest[2], "platforms": statuses, "rss": rss, "ai_analysis": ai_status, "report_bytes": report.stat().st_size}
 print(json.dumps(result, ensure_ascii=False))
 if statuses.get("failed"):
     print(f"::warning::{statuses['failed']} hotlist platforms failed; see crawler logs")
+if rss.get("sources", {}).get("failed"):
+    print("::warning::Some RSS sources failed; see crawler logs")
+if ai_status == "failed":
+    print("::warning::AI analysis failed; the report contains the provider error")
 summary = os.environ.get("GITHUB_STEP_SUMMARY")
 if summary:
     with open(summary, "a", encoding="utf-8") as f:
