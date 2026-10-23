@@ -31,7 +31,7 @@ GitHub Pages 通过官方 Actions 工作流部署，仅上传 HTML 报告，不�
 | WEWORK_MSG_TYPE | `markdown`（默认，可不填） |
 
 AI 分析只有在 API Key 和模型名已配置时才启用；标题筛选仍使用默认关键词。
-未提供企业微信 Webhook 时不会发送消息；配置完成后可手动运行 Get Hot News 验证。
+消息推送按用户要求暂缓，`notification.enabled` 已关闭。后续启用时再配置企业微信 Webhook 并打开通知开关。
 
 ## 企业微信端配置
 
