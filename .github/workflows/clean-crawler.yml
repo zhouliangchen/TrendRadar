@@ -1,28 +1,35 @@
 name: Check In
 
-# ✅ 签到续期：运行此 workflow 可重置 7 天计时，保持 "Get Hot News" 正常运行
-# ✅ Renewal: Run this workflow to reset the 7-day timer and keep "Get Hot News" active
-#
-# 📌 操作方法 / How to use:
-#   1. 点击 "Run workflow" 按钮 / Click "Run workflow" button
-#   2. 每 7 天内至少运行一次 / Run at least once every 7 days
-
+# Manually renew the 7-day trial without deleting workflow logs or stored data.
 on:
   workflow_dispatch:
 
+concurrency:
+  group: crawler-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+
 jobs:
-  del_runs:
+  renew:
     runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: read
     steps:
-      - name: Delete all workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+      - uses: actions/checkout@v6
         with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 0
-          delete_workflow_by_state_pattern: "ALL"
-          delete_run_by_conclusion_pattern: "ALL"
+          ref: master
+      - name: Renew trial and enable crawler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          date -u +%Y-%m-%dT%H:%M:%SZ > .github/check-in
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/check-in
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: 手动签到续期 7 天 [skip ci]"
+            git push origin HEAD:master
+          fi
+          gh workflow enable crawler.yml
+          echo "已续期 7 天；运行记录和历史数据保持完整。" >> "$GITHUB_STEP_SUMMARY"
